@@ -1,0 +1,204 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: translation_unit
+
+    2 translation_unit: external_declaration
+    3                 | translation_unit external_declaration
+
+    4 external_declaration: function_definition
+    5                     | declaration
+
+    6 function_definition: declaration_prefix identifier '(' parameter_list ')' compound_statement
+    7                    | declaration_prefix identifier '(' ')' compound_statement
+
+    8 declaration_prefix: special_specifier type_define
+    9                   | type_define
+
+   10 special_specifier: EXTERN
+   11                  | STATIC
+   12                  | AUTO
+   13                  | REGISTER
+
+   14 type_define: VOID
+   15            | CHAR
+   16            | INT
+   17            | DOUBLE
+   18            | BOOL
+   19            | FLOAT
+   20            | LONG
+   21            | SHORT
+
+   22 declaration: declaration_prefix init_declaration_list ';'
+
+   23 init_declaration_list: init_declaration
+   24                      | init_declaration_list ',' init_declaration
+
+   25 init_declaration: declaration_item
+   26                 | declaration_item '=' initializer
+
+   27 declaration_item: pointer simple_item
+   28                 | refer simple_item
+   29                 | simple_item
+
+   30 pointer: '*'
+   31        | '*' pointer
+
+   32 refer: '&'
+   33      | '&' refer
+
+   34 simple_item: identifier
+   35            | '(' declaration_item ')'
+   36            | simple_item '[' ']'
+   37            | simple_item '[' constant_expr ']'
+   38            | simple_item '(' parameter_list ')'
+   39            | simple_item '(' identifier_list ')'
+   40            | simple_item '(' ')'
+
+   41 identifier_list: identifier_list ',' identifier
+   42                | identifier
+
+   43 initializer: assignment_expr
+   44            | '{' initializer_list '}'
+
+   45 initializer_list: initializer
+   46                 | initializer_list ',' initializer
+
+   47 assignment_expr: condition_expr
+   48                | unary_expr assignment_op assignment_expr
+
+   49 assignment_op: '='
+   50              | ADD_ASSIGN
+   51              | SUB_ASSIGN
+   52              | MUL_ASSIGN
+   53              | DIV_ASSIGN
+   54              | MOD_ASSIGN
+   55              | LEFT_ASSIGN
+   56              | RIGHT_ASSIGN
+   57              | AND_ASSIGN
+   58              | XOR_ASSIGN
+   59              | OR_ASSIGN
+
+   60 condition_expr: logical_expr
+   61               | logical_expr '?' expr ':' condition_expr
+
+   62 logical_expr: bit_expr
+   63             | logical_expr OR_OP bit_expr
+   64             | logical_expr AND_OP bit_expr
+
+   65 bit_expr: equality_expr
+   66         | bit_expr '&' equality_expr
+   67         | bit_expr '^' equality_expr
+   68         | bit_expr '|' equality_expr
+
+   69 equality_expr: relational_expr
+   70              | equality_expr EQ_OP relational_expr
+   71              | equality_expr NE_OP relational_expr
+
+   72 relational_expr: shift_expr
+   73                | relational_expr '<' shift_expr
+   74                | relational_expr '>' shift_expr
+   75                | relational_expr LE_OP shift_expr
+   76                | relational_expr GE_OP shift_expr
+
+   77 shift_expr: add_expr
+   78           | shift_expr RIGHT_OP add_expr
+   79           | shift_expr LEFT_OP add_expr
+
+   80 add_expr: mul_expr
+   81         | add_expr '+' mul_expr
+   82         | add_expr '-' mul_expr
+
+   83 mul_expr: cast_expr
+   84         | mul_expr '*' cast_expr
+   85         | mul_expr '/' cast_expr
+   86         | mul_expr '%' cast_expr
+
+   87 cast_expr: unary_expr
+   88          | '(' type_define ')' cast_expr
+
+   89 unary_expr: postfix_expr
+   90           | unary_op cast_expr
+
+   91 unary_op: '+'
+   92         | '-'
+   93         | '~'
+   94         | '!'
+   95         | INC_OP
+   96         | DEC_OP
+
+   97 postfix_expr: primary_expr
+   98             | postfix_expr '[' expr ']'
+   99             | postfix_expr '(' ')'
+  100             | postfix_expr '(' argument_expr_list ')'
+  101             | postfix_expr '.' identifier
+  102             | postfix_expr PTR_OP identifier
+  103             | postfix_expr INC_OP
+  104             | postfix_expr DEC_OP
+
+  105 argument_expr_list: assignment_expr
+  106                   | argument_expr_list ',' assignment_expr
+
+  107 primary_expr: identifier
+  108             | constant_expr
+  109             | '(' expr ')'
+  110             | str_constant
+
+  111 identifier: ID
+
+  112 constant_expr: CONSTANT
+  113              | TRUE
+  114              | FALSE
+
+  115 str_constant: STR_CONSTANT
+
+  116 parameter_list: parameter_declaration
+  117               | parameter_list ',' parameter_declaration
+
+  118 parameter_declaration: declaration_prefix declaration_item
+
+  119 compound_statement: '{' '}'
+  120                   | '{' compound_statement_list '}'
+
+  121 compound_statement_list: statement_list
+  122                        | declaration_list
+  123                        | compound_statement_list declaration_list
+  124                        | compound_statement_list statement_list
+
+  125 declaration_list: declaration
+  126                 | declaration_list declaration
+
+  127 statement_list: statement
+  128               | statement_list statement
+
+  129 statement: labeled_statement
+  130          | compound_statement
+  131          | expr_statement
+  132          | condition_statement
+  133          | loop_statement
+  134          | jump_statement
+
+  135 labeled_statement: identifier ':' statement
+  136                  | CASE constant_expr ':' statement
+  137                  | DEFAULT ':' statement
+
+  138 expr_statement: ';'
+  139               | expr ';'
+
+  140 condition_statement: IF '(' expr ')' statement
+  141                    | IF '(' expr ')' statement ELSE statement
+  142                    | SWITCH '(' expr ')' statement
+
+  143 expr: assignment_expr
+  144     | expr ',' assignment_expr
+
+  145 loop_statement: WHILE '(' expr ')' statement
+  146               | DO statement WHILE '(' expr ')' ';'
+  147               | FOR '(' expr_statement expr_statement expr ')' statement
+
+  148 jump_statement: GOTO identifier ';'
+  149               | CONTINUE ';'
+  150               | BREAK ';'
+  151               | RETURN ';'
+  152               | RETURN expr ';'
