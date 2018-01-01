@@ -5,13 +5,20 @@
 #include <string>
 #include <string.h>
 #include <unordered_map>
-#include "tree.h"
+#include "newTree.h"
+#include "symbol.h"
 #include "parser.hpp"
 using namespace std;
 
 unsigned int cnt = 0;
 unordered_map<string, unsigned int> properties;
+extern symbol_table symbtl;
 
+Node dummy;
+
+int lineno = 1;
+
+static void print_token(int token, char* lexeme, int attr = 0);
 %}
 
 letter      [_A-Za-z]
@@ -39,7 +46,6 @@ whitespace      {delimitation}+
 "//".*      { /* do nothing */ }
 "/*"([^\*\/]|"*"[^\/])*"*/" { /* do nothing */ }
 
-"auto"	        {return AUTO;}
 "bool"          {return BOOL;}
 "break"	        {return BREAK;}
 "case"	        {return CASE;}
@@ -49,17 +55,13 @@ whitespace      {delimitation}+
 "do"	        {return DO;}
 "double"        {return DOUBLE;}
 "else"	        {return ELSE;}
-"extern"        {return EXTERN;}
 "float"	        {return FLOAT;}
 "for"	        {return FOR;}
-"goto"	        {return GOTO;}
 "if"	        {return IF;}
 "int"	        {return INT;}
 "long"	        {return LONG;}
-"register"	    {return REGISTER;}
 "return"        {return RETURN;}
 "short"	        {return SHORT;}
-"static"        {return STATIC;}
 "switch"        {return SWITCH;}
 "void"	        {return VOID;}
 "while"	        {return WHILE;}
@@ -111,10 +113,13 @@ whitespace      {delimitation}+
 "?"			    {return '?';}
 
 {charVal}   {
+    print_token(CONSTANT,yytext);
+    
     yylval.text = strdup(yytext);
     return CONSTANT;
 }
 {stringVal} {
+
     yylval.text = strdup(yytext);
     return STR_CONSTANT;
 }
@@ -142,4 +147,15 @@ whitespace      {delimitation}+
 
 int yywrap() {
 return 1;
+}
+
+static void print_token(int token, char *lexeme, int attr) {
+#ifdef LEX_DEBUG
+    cout << "token: " << token << ",\tlexeme: " << lexeme;
+    if (token == ID)
+        cout << ",\tsymbol table pos: " << attr;
+    else if (token == NUM)
+        cout << ",\tvalue: " << attr;
+    cout << endl;
+#endif
 }
