@@ -46,7 +46,7 @@ public:
     void output(void);
 };
 
-class tree {
+class Tree {
 private:
     Node *root;
     static node_seq;
