@@ -106,7 +106,6 @@ whitespace      {delimitation}+
 "<<"			{print_token(LEFT_OP, yytext); return LEFT_OP;}
 "++"			{print_token(INC_OP, yytext); return INC_OP;}
 "--"			{print_token(DEC_OP, yytext); return DEC_OP;}
-"->"			{print_token(PTR_OP, yytext); return PTR_OP;}
 "&&"			{print_token(AND_OP, yytext); return AND_OP;}
 "||"			{print_token(OR_OP, yytext); return OR_OP;}
 "<="			{print_token(LE_OP, yytext); return LE_OP;}
@@ -123,7 +122,6 @@ whitespace      {delimitation}+
 "="			    {print_token(ASSIGN, yytext); return ASSIGN;}
 "("			    {print_token(LPAREN, yytext); return LPAREN;}
 ")"			    {print_token(RPAREN, yytext); return RPAREN;}
-"."			    {print_token(DOT, yytext); return DOT;}
 "!"			    {print_token(NOT, yytext); return NOT;}
 "~"			    {print_token(TLIDE, yytext); return TLIDE;}
 "-"			    {print_token(SUB, yytext); return SUB;}
