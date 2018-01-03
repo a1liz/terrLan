@@ -104,14 +104,26 @@ whitespace      {delimitation}+
 "|="			{print_token(OR_ASSIGN, yytext); return OR_ASSIGN;}
 ">>"			{print_token(RIGHT_OP, yytext); return RIGHT_OP;}
 "<<"			{print_token(LEFT_OP, yytext); return LEFT_OP;}
-"++"			{print_token(INC_OP, yytext); return INC_OP;}
-"--"			{print_token(DEC_OP, yytext); return DEC_OP;}
 "&&"			{print_token(AND_OP, yytext); return AND_OP;}
 "||"			{print_token(OR_OP, yytext); return OR_OP;}
 "<="			{print_token(LE_OP, yytext); return LE_OP;}
 ">="			{print_token(GE_OP, yytext); return GE_OP;}
 "=="			{print_token(EQ_OP, yytext); return EQ_OP;}
 "!="			{print_token(NE_OP, yytext); return NE_OP;}
+"+"			    {print_token(ADD, yytext); return ADD;}
+"-"			    {print_token(SUB, yytext); return SUB;}
+"*"			    {print_token(MUL, yytext); return MUL;}
+"/"			    {print_token(DIV, yytext); return DIV;}
+"%"			    {print_token(MOD, yytext); return MOD;}
+"<"			    {print_token(LT, yytext); return LT;}
+">"			    {print_token(GT, yytext); return GT;}
+"&"			    {print_token(AND, yytext); return AND;}
+"^"			    {print_token(XOR, yytext); return XOR;}
+"|"			    {print_token(OR, yytext); return OR;}
+"++"			{print_token(INC_OP, yytext); return INC_OP;}
+"--"			{print_token(DEC_OP, yytext); return DEC_OP;}
+"!"			    {print_token(NOT, yytext); return NOT;}
+"~"			    {print_token(TLIDE, yytext); return TLIDE;}
 ";"			    {print_token(SEMICOLON, yytext); return SEMICOLON;}
 ("{"|"<%")		{print_token(LBRACE, yytext); return LBRACE;}
 ("}"|"%>")		{print_token(RBRACE, yytext); return RBRACE;}
@@ -122,18 +134,6 @@ whitespace      {delimitation}+
 "="			    {print_token(ASSIGN, yytext); return ASSIGN;}
 "("			    {print_token(LPAREN, yytext); return LPAREN;}
 ")"			    {print_token(RPAREN, yytext); return RPAREN;}
-"!"			    {print_token(NOT, yytext); return NOT;}
-"~"			    {print_token(TLIDE, yytext); return TLIDE;}
-"-"			    {print_token(SUB, yytext); return SUB;}
-"+"			    {print_token(ADD, yytext); return ADD;}
-"*"			    {print_token(MUL, yytext); return MUL;}
-"/"			    {print_token(DIV, yytext); return DIV;}
-"%"			    {print_token(MOD, yytext); return MOD;}
-"<"			    {print_token(LT, yytext); return LT;}
-">"			    {print_token(GT, yytext); return GT;}
-"&"			    {print_token(AND, yytext); return AND;}
-"^"			    {print_token(XOR, yytext); return XOR;}
-"|"			    {print_token(OR, yytext); return OR;}
 "?"			    {print_token(QUESTION, yytext); return QUESTION;}
 
 {charVal}   {
