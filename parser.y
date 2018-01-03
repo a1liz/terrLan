@@ -16,29 +16,28 @@ extern void setyylVal(char * text);
 
 %define api.value.type {NodeAttr}
 
-%token AUTO BOOL BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE
-%token EXTERN FLOAT FOR GOTO IF INT LONG REGISTER RETURN SHORT
-%token SIZEOF STATIC SWITCH
+%token BOOL BREAK CASE CHAR CONTINUE DEFAULT DO DOUBLE ELSE
+%token FLOAT FOR IF INT RETURN SWITCH
 %token VOID WHILE TRUE FALSE
-%token ID CONSTANT STR_CONSTANT 
+%token ID CONSTCHAR NUM 
 %token RIGHT_ASSIGN LEFT_ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
 %token MOD_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %token RIGHT_OP LEFT_OP INC_OP DEC_OP PTR_OP AND_OP OR_OP LE_OP GE_OP
 %token EQ_OP NE_OP
 
-%left ','
+%left COMMA
 %right LEFT_ASSIGN RIGHT_ASSIGN ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN 
 %right MOD_ASSIGN AND_ASSIGN XOR_ASSIGN OR_ASSIGN
 %left OR_OP
 %left AND_OP
-%left '|'
-%left '^'
-%left '&'
+%left OR
+%left XOR
+%left AND
 %left EQ_OP NE_OP
-%left LE_OP GE_OP '>' '<'
+%left LE_OP GE_OP GT LT
 %left RIGHT_OP LEFT_OP
-%left '+' '-'
-%left '*' '/' '%'
+%left ADD SUB
+%left MUL DIV MOD
 
 %%
 program : translation_unit {
@@ -78,7 +77,7 @@ external_declaration    :   function_definition {
                                         }
                         ;
 
-function_definition     :       declaration_prefix identifier '(' parameter_list ')' compound_statement {
+function_definition     :       declaration_prefix identifier LPAREN parameter_list RPAREN compound_statement {
                                                                                                         $$.node = tree.addNode(FUNCTION_DEFINITION);
                                                                                                         Node *node = tree.getNodeById($$.node);
                                                                                                         node->addChild($1.node);
@@ -87,7 +86,7 @@ function_definition     :       declaration_prefix identifier '(' parameter_list
                                                                                                         node->addChild($6.node);
                                                                                                         tree.print_tree_node($$.node);       
                                                                                                 }
-                        |       declaration_prefix identifier '(' ')' compound_statement {
+                        |       declaration_prefix identifier LPAREN RPAREN compound_statement {
                                                                                                         $$.node = tree.addNode(FUNCTION_DEFINITION);
                                                                                                         Node *node = tree.getNodeById($$.node);
                                                                                                         node->addChild($1.node);
@@ -140,7 +139,7 @@ type_define :   VOID    {$$.node = tree.addNode(TYPE_DEFINE,string("void").c_str
             |   SHORT   {$$.node = tree.addNode(TYPE_DEFINE,string("short").c_str());tree.print_tree_node($$.node);}
             ;
 
-declaration :  declaration_prefix init_declaration_list ';' {
+declaration :  declaration_prefix init_declaration_list SEMICOLON {
                                                                     $$.node = tree.addNode(DECLARATION);
                                                                     Node *node = tree.getNodeById($$.node);
                                                                     node->addChild($1.node);
@@ -150,58 +149,16 @@ declaration :  declaration_prefix init_declaration_list ';' {
             ;
 
 init_declaration_list   :   init_declaration {$$.node = tree.addNode(INIT_DECLARATION_LIST); Node *node = tree.getNodeById($$.node); node->addChild($1.node); tree.print_tree_node($$.node);}
-                        |   init_declaration_list ',' init_declaration {$$.node = tree.addNode(INIT_DECLARATION_LIST); Node *node = tree.getNodeById($$.node); node->addChild($1.node); node->addChild($3.node); tree.print_tree_node($$.node);}
+                        |   init_declaration_list COMMA init_declaration {$$.node = tree.addNode(INIT_DECLARATION_LIST); Node *node = tree.getNodeById($$.node); node->addChild($1.node); node->addChild($3.node); tree.print_tree_node($$.node);}
                         ;
 
 init_declaration    :   declaration_item {$$.node = tree.addNode(INIT_DECLARATION); Node *node = tree.getNodeById($$.node); node->addChild($1.node); tree.print_tree_node($$.node);}
-                    |   declaration_item '=' initializer {$$.node = tree.addNode(INIT_DECLARATION); Node *node = tree.getNodeById($$.node); node->addChild($1.node); node->addChild($3.node); tree.print_tree_node($$.node);}
+                    |   declaration_item ASSIGN initializer {$$.node = tree.addNode(INIT_DECLARATION); Node *node = tree.getNodeById($$.node); node->addChild($1.node); node->addChild($3.node); tree.print_tree_node($$.node);}
 
 declaration_item    :   pointer simple_item {$$.node = tree.addNode(DECLARATION_ITEM); Node *node = tree.getNodeById($$.node); node->addChild($1.node); tree.print_tree_node($$.node);}
                     |   refer simple_item {$$.node = tree.addNode(DECLARATION_ITEM); Node *node = tree.getNodeById($$.node); node->addChild($1.node); tree.print_tree_node($$.node);}
                     |   simple_item {$$.node = tree.addNode(DECLARATION_ITEM); Node *node = tree.getNodeById($$.node); node->addChild($1.node); tree.print_tree_node($$.node);}
                     ;
-
-pointer :   '*' {
-                $1.node = tree.addNode(POINTER, "*");
-                tree.print_tree_node($1.node);
-
-                $$.node = tree.addNode(POINTER);
-                Node *node = tree.getNodeById($$.node);
-                node->addChild($1.node);
-                tree.print_tree_node($$.node); 
-                }
-        |   '*' pointer { 
-                        $1.node = tree.addNode(POINTER, "*");
-                        tree.print_tree_node($1.node);
-
-                        $$.node = tree.addNode(POINTER); 
-                        Node *node = tree.getNodeById($$.node);
-                        node->addChild($1.node);
-                        node->addChild($2.node);
-                        tree.print_tree_node($$.node); 
-                }
-        ;
-
-refer   :   '&' {
-                $1.node = tree.addNode(REFER, "&");
-                tree.print_tree_node($1.node);
-
-                $$.node = tree.addNode(REFER);
-                Node *node = tree.getNodeById($$.node);
-                node->addChild($1.node);
-                tree.print_tree_node($$.node); 
-                }
-        |   '&' refer { 
-                        $1.node = tree.addNode(REFER, "&");
-                        tree.print_tree_node($1.node);
-
-                        $$.node = tree.addNode(REFER); 
-                        Node *node = tree.getNodeById($$.node);
-                        node->addChild($1.node);
-                        node->addChild($2.node);
-                        tree.print_tree_node($$.node); 
-                }
-        ;
 
 simple_item :   identifier      {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
@@ -209,40 +166,40 @@ simple_item :   identifier      {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   '(' declaration_item ')' {
+            |   LPAREN declaration_item RPAREN {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($2.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   simple_item '[' ']' {
+            |   simple_item LBRACKET RBRACKET {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   simple_item '[' constant_expr ']' {
+            |   simple_item LBRACKET constant_expr RBRACKET {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-            |   simple_item '(' parameter_list ')' {
+            |   simple_item LPAREN parameter_list RPAREN {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-            |   simple_item '(' identifier_list ')' {
+            |   simple_item LPAREN identifier_list RPAREN {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-            |   simple_item '(' ')' {
+            |   simple_item LPAREN RPAREN {
                                 $$.node = tree.addNode(SIMPLE_ITEM);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -250,7 +207,7 @@ simple_item :   identifier      {
                         }                       
             ;
 
-identifier_list :       identifier_list ',' identifier {
+identifier_list :       identifier_list COMMA identifier {
                                 $$.node = tree.addNode(IDENTIFIER_LIST);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -271,7 +228,7 @@ initializer :   assignment_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-            |   '{' initializer_list '}' {
+            |   LBRACE initializer_list RBRACE {
                                 $$.node = tree.addNode(INITIALIZER);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($2.node);
@@ -285,7 +242,7 @@ initializer_list    :   initializer {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-                    |   initializer_list ',' initializer {
+                    |   initializer_list COMMA initializer {
                                 $$.node = tree.addNode(INITIALIZER_LIST);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -310,7 +267,7 @@ assignment_expr :   condition_expr {
                         }                       
                 ;
 
-assignment_op   : '=' 	 { $$.node = tree.addNode(OPERATOR, string("op =").c_str()); tree.print_tree_node($$.node);}
+assignment_op   : ASSIGN 	 { $$.node = tree.addNode(OPERATOR, string("op =").c_str()); tree.print_tree_node($$.node);}
                 | ADD_ASSIGN { $$.node = tree.addNode(OPERATOR, string("op +=").c_str()); tree.print_tree_node($$.node);}
                 | SUB_ASSIGN { $$.node = tree.addNode(OPERATOR, string("op -=").c_str()); tree.print_tree_node($$.node);}
                 | MUL_ASSIGN { $$.node = tree.addNode(OPERATOR, string("op *=").c_str()); tree.print_tree_node($$.node);}
@@ -329,7 +286,7 @@ condition_expr  :   logical_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }                       
-                |   logical_expr '?' expr ':' condition_expr {
+                |   logical_expr QUESTION expr COLON condition_expr {
                                 $$.node = tree.addNode(CONDITION_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -375,7 +332,7 @@ bit_expr    :   equality_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }                 
-            |   bit_expr '&' equality_expr {
+            |   bit_expr AND equality_expr {
                                 $2.node = tree.addNode(OPERATOR, string("bit_op &").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -386,7 +343,7 @@ bit_expr    :   equality_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }                 
-            |   bit_expr '^' equality_expr {
+            |   bit_expr XOR equality_expr {
                                 $2.node = tree.addNode(OPERATOR, string("bit_op ^").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -397,7 +354,7 @@ bit_expr    :   equality_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }                 
-            |   bit_expr '|' equality_expr {
+            |   bit_expr OR equality_expr {
                                 $2.node = tree.addNode(OPERATOR, string("bit_op |").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -446,7 +403,7 @@ relational_expr :   shift_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }            
-                |   relational_expr '<' shift_expr {
+                |   relational_expr LT shift_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op <").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -457,7 +414,7 @@ relational_expr :   shift_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }            
-                |   relational_expr '>' shift_expr {
+                |   relational_expr GT shift_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op >").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -528,7 +485,7 @@ add_expr    :   mul_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }            
-            |   add_expr '+' mul_expr {
+            |   add_expr ADD mul_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op +").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -539,7 +496,7 @@ add_expr    :   mul_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   add_expr '-' mul_expr {
+            |   add_expr SUB mul_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op -").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -558,7 +515,7 @@ mul_expr    :   cast_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   mul_expr '*' cast_expr {
+            |   mul_expr MUL cast_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op *").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -569,7 +526,7 @@ mul_expr    :   cast_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   mul_expr '/' cast_expr {
+            |   mul_expr DIV cast_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op /").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -580,7 +537,7 @@ mul_expr    :   cast_expr {
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   mul_expr '%' cast_expr {
+            |   mul_expr MOD cast_expr {
                                 $2.node = tree.addNode(OPERATOR, string("op %").c_str());
                                 tree.print_tree_node($2.node);
 
@@ -599,7 +556,7 @@ cast_expr   :   unary_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-            |   '(' type_define ')' cast_expr {
+            |   LPAREN type_define RPAREN cast_expr {
                                 $$.node = tree.addNode(CAST_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($2.node);
@@ -623,19 +580,19 @@ unary_expr  :   postfix_expr {
                         }
             ;
 
-unary_op    :   '+' {
+unary_op    :   ADD {
                         $$.node = tree.addNode(UNARY_OP, "unary_op +");
                         tree.print_tree_node($$.node);        
                 }
-            |   '-' {
+            |   SUB {
                         $$.node = tree.addNode(UNARY_OP, "unary_op -");
                         tree.print_tree_node($$.node);        
                 }
-            |   '~' {
+            |   TLIDE {
                         $$.node = tree.addNode(UNARY_OP, "unary_op ~");
                         tree.print_tree_node($$.node);        
                 }
-            |   '!' {
+            |   NOT {
                         $$.node = tree.addNode(UNARY_OP, "unary_op !");
                         tree.print_tree_node($$.node);        
                 }
@@ -655,27 +612,27 @@ postfix_expr    :   primary_expr {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-                |   postfix_expr '[' expr ']' {
+                |   postfix_expr LBRACKET expr RBRACKET {
                                 $$.node = tree.addNode(POSTFIX_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }
-                |   postfix_expr '(' ')' {
+                |   postfix_expr LPAREN RPAREN {
                                 $$.node = tree.addNode(POSTFIX_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-                |   postfix_expr '(' argument_expr_list ')' {
+                |   postfix_expr LPAREN argument_expr_list RPAREN {
                                 $$.node = tree.addNode(POSTFIX_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                        
                         }
-                |   postfix_expr '.' identifier {
+                |   postfix_expr DOT identifier {
                                 $$.node = tree.addNode(POSTFIX_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -721,7 +678,7 @@ argument_expr_list      :       assignment_expr {
                                                 node->addChild($1.node);
                                                 tree.print_tree_node($$.node);                                    
                                         }
-                        |       argument_expr_list ',' assignment_expr {
+                        |       argument_expr_list COMMA assignment_expr {
                                                 $$.node = tree.addNode(ARGUMENT_EXPR_LIST);
                                                 Node *node = tree.getNodeById($$.node);
                                                 node->addChild($1.node);
@@ -741,7 +698,7 @@ primary_expr    :   identifier {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);                        
                         }
-                |   '(' expr ')' {
+                |   LPAREN expr RPAREN {
                                 $$.node = tree.addNode(PRIMARY_EXPR);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($2.node);
@@ -791,7 +748,7 @@ parameter_list  :   parameter_declaration {
                                                 node->addChild($1.node);
                                                 tree.print_tree_node($$.node);                                        
                                         }
-                |   parameter_list ',' parameter_declaration {
+                |   parameter_list COMMA parameter_declaration {
                                                 $$.node = tree.addNode(PARAMETER_LIST);
                                                 Node *node = tree.getNodeById($$.node);
                                                 node->addChild($1.node);
@@ -809,11 +766,11 @@ parameter_declaration   :   declaration_prefix  declaration_item {
                                         }
                         ;
 
-compound_statement  :   '{' '}' {
+compound_statement  :   LBRACE RBRACE {
                                 $$.node = tree.addNode(COMPOUND_STATEMENT);
                                 tree.print_tree_node($$.node);                                        
                         }
-                    |   '{' compound_statement_list '}' {
+                    |   LBRACE compound_statement_list RBRACE {
                                                 $$.node = tree.addNode(COMPOUND_STATEMENT);
                                                 Node *node = tree.getNodeById($$.node);
                                                 node->addChild($2.node);
@@ -887,14 +844,14 @@ statement   :   labeled_statement { $$ = $1; }
             |   jump_statement { $$ = $1; }
             ;
 
-labeled_statement   :   identifier ':' statement {
+labeled_statement   :   identifier COLON statement {
                                 $$.node = tree.addNode(LABELED_STATEMENT);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
                                 node->addChild($3.node);
                                 tree.print_tree_node($$.node);                                        
                         }
-                    |   CASE constant_expr ':' statement {
+                    |   CASE constant_expr COLON statement {
                                 $1.node = tree.addNode(KEYWORD, "case ");
                                 tree.print_tree_node($1.node);
                         
@@ -905,7 +862,7 @@ labeled_statement   :   identifier ':' statement {
                                 node->addChild($4.node);
                                 tree.print_tree_node($$.node);                                        
                         }
-                    |   DEFAULT ':' statement {
+                    |   DEFAULT COLON statement {
                                 $1.node = tree.addNode(KEYWORD, "default ");
                                 tree.print_tree_node($1.node);
                         
@@ -917,11 +874,11 @@ labeled_statement   :   identifier ':' statement {
                         }
                     ;
 
-expr_statement  :   ';' {
+expr_statement  :   SEMICOLON {
                                 $$.node = tree.addNode(EXPR_STATEMENT);
                                 tree.print_tree_node($$.node);                                        
                         }
-                |   expr ';' {
+                |   expr SEMICOLON {
                                 $$.node = tree.addNode(EXPR_STATEMENT);
                                 Node *node = tree.getNodeById($$.node);
                                 node->addChild($1.node);
@@ -929,7 +886,7 @@ expr_statement  :   ';' {
                         }
                 ;
 
-condition_statement :   IF '(' expr ')' statement {
+condition_statement :   IF LPAREN expr RPAREN statement {
                                 $1.node = tree.addNode(KEYWORD, "if ");
                                 tree.print_tree_node($1.node);
                         
@@ -940,7 +897,7 @@ condition_statement :   IF '(' expr ')' statement {
                                 node->addChild($5.node);
                                 tree.print_tree_node($$.node);                                        
                         }
-                    |   IF '(' expr ')' statement ELSE statement {
+                    |   IF LPAREN expr RPAREN statement ELSE statement {
                                 $1.node = tree.addNode(KEYWORD, "if-else ");
                                 tree.print_tree_node($1.node);
                         
@@ -952,7 +909,7 @@ condition_statement :   IF '(' expr ')' statement {
                                 node->addChild($7.node);
                                 tree.print_tree_node($$.node);                                        
                         }
-                    |   SWITCH '(' expr ')' statement {
+                    |   SWITCH LPAREN expr RPAREN statement {
                                 $1.node = tree.addNode(KEYWORD, "switch ");
                                 tree.print_tree_node($1.node);
                         
@@ -971,7 +928,7 @@ expr      :       assignment_expr {
                                         node->addChild($1.node);
                                         tree.print_tree_node($$.node);
                                 }
-                | expr ',' assignment_expr {
+                | expr COMMA assignment_expr {
                                         $$.node = tree.addNode(EXPR);  
                                         Node *node = tree.getNodeById($$.node);
                                         node->addChild($1.node);
@@ -980,7 +937,7 @@ expr      :       assignment_expr {
                                 }
 			;
 
-loop_statement : WHILE '(' expr ')' statement {
+loop_statement : WHILE LPAREN expr RPAREN statement {
                                                 $1.node = tree.addNode(KEYWORD, "while ");
                                                 tree.print_tree_node($1.node);
 
@@ -991,7 +948,7 @@ loop_statement : WHILE '(' expr ')' statement {
                                                 node->addChild($5.node);
                                                 tree.print_tree_node($$.node);
                                         }
-                | DO statement WHILE '(' expr ')' ';' {
+                | DO statement WHILE LPAREN expr RPAREN SEMICOLON {
                                                 $1.node = tree.addNode(KEYWORD, "do-while ");
                                                 tree.print_tree_node($1.node);
 
@@ -1002,7 +959,7 @@ loop_statement : WHILE '(' expr ')' statement {
                                                 node->addChild($5.node);
                                                 tree.print_tree_node($$.node);
                                         }
-                | FOR '(' expr_statement expr_statement expr ')' statement {
+                | FOR LPAREN expr_statement expr_statement expr RPAREN statement {
                                                 $1.node = tree.addNode(KEYWORD, "for ");
                                                 tree.print_tree_node($1.node);
 
@@ -1017,7 +974,7 @@ loop_statement : WHILE '(' expr ')' statement {
                                         }
                 ;
 				
-jump_statement : GOTO identifier ';' {
+jump_statement : GOTO identifier SEMICOLON {
                                         $1.node = tree.addNode(KEYWORD, "goto");
                                         tree.print_tree_node($1.node);
 
@@ -1027,7 +984,7 @@ jump_statement : GOTO identifier ';' {
                                         node->addChild($2.node);
                                         tree.print_tree_node($$.node);
                                 }
-                | CONTINUE ';' {
+                | CONTINUE SEMICOLON {
                                 $1.node = tree.addNode(KEYWORD, "continue");
                                 tree.print_tree_node($1.node);
 
@@ -1036,7 +993,7 @@ jump_statement : GOTO identifier ';' {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);
                         }
-                | BREAK ';' {
+                | BREAK SEMICOLON {
                                 $1.node = tree.addNode(KEYWORD, "break");
                                 tree.print_tree_node($1.node);
 
@@ -1045,7 +1002,7 @@ jump_statement : GOTO identifier ';' {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);
                         }
-                | RETURN ';' {
+                | RETURN SEMICOLON {
                                 $1.node = tree.addNode(KEYWORD, "return");
                                 tree.print_tree_node($1.node);
 
@@ -1054,7 +1011,7 @@ jump_statement : GOTO identifier ';' {
                                 node->addChild($1.node);
                                 tree.print_tree_node($$.node);
                         }
-                | RETURN expr ';' {
+                | RETURN expr SEMICOLON {
                                 $1.node = tree.addNode(KEYWORD, "return");
                                 tree.print_tree_node($1.node);
 
