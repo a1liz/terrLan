@@ -43,99 +43,136 @@ whitespace      {delimitation}+
 
 
 
-"//".*      { /* do nothing */ }
-"/*"([^\*\/]|"*"[^\/])*"*/" { /* do nothing */ }
+"/*"        {
+                char c;
+                LABEL:
+                do
+                {
+                    c = input();
+                    if( c == '\n')
+                    	lineno++;
+                }while(c != '*');
+                
+                do
+                {
+                    c = input();
+                    if(c == '/')
+                        break;
+                    if( c == '\n')
+                    	lineno++;
+                    if(c != '*')
+                        goto LABEL;
+                }while(c == '*');
+            }
+"bool"          {print_token(BOOL, yytext); return BOOL;}
+"break"	        {print_token(BREAK, yytext); return BREAK;}
+"case"	        {print_token(CASE, yytext); return CASE;}
+"char"	        {print_token(CHAR, yytext); return CHAR;}
+"continue"	    {print_token(CONTINUE, yytext); return CONTINUE;}
+"default"	    {print_token(DEFAULT, yytext); return DEFAULT;}
+"do"	        {print_token(DO, yytext); return DO;}
+"double"        {print_token(DOUBLE, yytext); return DOUBLE;}
+"else"	        {print_token(ELSE, yytext); return ELSE;}
+"float"	        {print_token(FLOAT, yytext); return FLOAT;}
+"for"	        {print_token(FOR, yytext); return FOR;}
+"if"	        {print_token(IF, yytext); return IF;}
+"int"	        {print_token(INT, yytext); return INT;}
+"return"        {print_token(RETURN, yytext); return RETURN;}
+"switch"        {print_token(SWITCH, yytext); return SWITCH;}
+"void"	        {print_token(VOID, yytext); return VOID;}
+"while"	        {print_token(WHILE, yytext); return WHILE;}
 
-"bool"          {return BOOL;}
-"break"	        {return BREAK;}
-"case"	        {return CASE;}
-"char"	        {return CHAR;}
-"continue"	    {return CONTINUE;}
-"default"	    {return DEFAULT;}
-"do"	        {return DO;}
-"double"        {return DOUBLE;}
-"else"	        {return ELSE;}
-"float"	        {return FLOAT;}
-"for"	        {return FOR;}
-"if"	        {return IF;}
-"int"	        {return INT;}
-"long"	        {return LONG;}
-"return"        {return RETURN;}
-"short"	        {return SHORT;}
-"switch"        {return SWITCH;}
-"void"	        {return VOID;}
-"while"	        {return WHILE;}
-
-">>="			{return RIGHT_ASSIGN;}
-"<<="			{return LEFT_ASSIGN;}
-"+="			{return ADD_ASSIGN;}
-"-="			{return SUB_ASSIGN;}
-"*="			{return MUL_ASSIGN;}
-"/="			{return DIV_ASSIGN;}
-"%="			{return MOD_ASSIGN;}
-"&="			{return AND_ASSIGN;}
-"^="			{return XOR_ASSIGN;}
-"|="			{return OR_ASSIGN;}
-">>"			{return RIGHT_OP;}
-"<<"			{return LEFT_OP;}
-"++"			{return INC_OP;}
-"--"			{return DEC_OP;}
-"->"			{return PTR_OP;}
-"&&"			{return AND_OP;}
-"||"			{return OR_OP;}
-"<="			{return LE_OP;}
-">="			{return GE_OP;}
-"=="			{return EQ_OP;}
-"!="			{return NE_OP;}
-";"			    {return ';';}
-("{"|"<%")		{return '{';}
-("}"|"%>")		{return '}';}
-","			    {return ',';}
-":"			    {return ':';}
-"="			    {return '=';}
-"("			    {return '(';}
-")"			    {return ')';}
-("["|"<:")		{return ']';}
-("]"|":>")		{return '[';}
-"."			    {return '.';}
-"&"			    {return '&';}
-"!"			    {return '!';}
-"~"			    {return '~';}
-"-"			    {return '-';}
-"+"			    {return '+';}
-"*"			    {return '*';}
-"/"			    {return '/';}
-"%"			    {return '%';}
-"<"			    {return '<';}
-">"			    {return '>';}
-"^"			    {return '^';}
-"|"			    {return '|';}
-"?"			    {return '?';}
+">>="			{print_token(RIGHT_ASSIGN, yytext); return RIGHT_ASSIGN;}
+"<<="			{print_token(LEFT_ASSIGN, yytext); return LEFT_ASSIGN;}
+"+="			{print_token(ADD_ASSIGN, yytext); return ADD_ASSIGN;}
+"-="			{print_token(SUB_ASSIGN, yytext); return SUB_ASSIGN;}
+"*="			{print_token(MUL_ASSIGN, yytext); return MUL_ASSIGN;}
+"/="			{print_token(DIV_ASSIGN, yytext); return DIV_ASSIGN;}
+"%="			{print_token(MOD_ASSIGN, yytext); return MOD_ASSIGN;}
+"&="			{print_token(AND_ASSIGN, yytext); return AND_ASSIGN;}
+"^="			{print_token(XOR_ASSIGN, yytext); return XOR_ASSIGN;}
+"|="			{print_token(OR_ASSIGN, yytext); return OR_ASSIGN;}
+">>"			{print_token(RIGHT_OP, yytext); return RIGHT_OP;}
+"<<"			{print_token(LEFT_OP, yytext); return LEFT_OP;}
+"++"			{print_token(INC_OP, yytext); return INC_OP;}
+"--"			{print_token(DEC_OP, yytext); return DEC_OP;}
+"->"			{print_token(PTR_OP, yytext); return PTR_OP;}
+"&&"			{print_token(AND_OP, yytext); return AND_OP;}
+"||"			{print_token(OR_OP, yytext); return OR_OP;}
+"<="			{print_token(LE_OP, yytext); return LE_OP;}
+">="			{print_token(GE_OP, yytext); return GE_OP;}
+"=="			{print_token(EQ_OP, yytext); return EQ_OP;}
+"!="			{print_token(NE_OP, yytext); return NE_OP;}
+";"			    {print_token(SEMICOLON, yytext); return SEMICOLON;}
+("{"|"<%")		{print_token(LBRACE, yytext); return LBRACE;}
+("}"|"%>")		{print_token(RBRACE, yytext); return RBRACE;}
+("["|"<:")		{print_token(LBRACKET, yytext); return LBRACKET;}
+("]"|":>")		{print_token(RBRACKET, yytext); return RBRACE;}
+","			    {print_token(COMMA, yytext); return COMMA;}
+":"			    {print_token(COLON, yytext); return COLON;}
+"="			    {print_token(ASSIGN, yytext); return ASSIGN;}
+"("			    {print_token(LPAREN, yytext); return LPAREN;}
+")"			    {print_token(RPAREN, yytext); return RPAREN;}
+"."			    {print_token(DOT, yytext); return DOT;}
+"&"			    {print_token(AND, yytext); return AND;}
+"!"			    {print_token(NOT, yytext); return NOT;}
+"~"			    {print_token(TLIDE, yytext); return TLIDE;}
+"-"			    {print_token(SUB, yytext); return SUB;}
+"+"			    {print_token(ADD, yytext); return ADD;}
+"*"			    {print_token(MUL, yytext); return MUL;}
+"/"			    {print_token(DIV, yytext); return DIV;}
+"%"			    {print_token(MOD, yytext); return MOD;}
+"<"			    {print_token(LT, yytext); return LT;}
+">"			    {print_token(GT, yytext); return GT;}
+"^"			    {print_token(XOR, yytext); return XOR;}
+"|"			    {print_token(OR, yytext); return OR;}
+"?"			    {print_token(QUESTION, yytext); return QUESTION;}
 
 {charVal}   {
-    print_token(CONSTANT,yytext);
-    
-    yylval.text = strdup(yytext);
-    return CONSTANT;
+    print_token(CONSTCHAR,yytext);
+    yylval = &dummy;
+    yylval->attr.valc = yytext[0];
+    return CONSTCHAR;
 }
 {stringVal} {
-
-    yylval.text = strdup(yytext);
-    return STR_CONSTANT;
+    print_token(CONSTSTR,yytext);
+    yylval = &dummy;
+    yylval->attr.vals = strdup(yytext);
+    return CONSTSTR;
 }
 {boolVal}   {
-    yylval.text = strdup(yytext);
-    return CONSTANT;    
+    print_token(CONSTBOOL,yytext);
+    yylval = &dummy;
+    char* t = "true",f = "false";
+    if (strcmp(t, yytext) == 0) {
+        yylval->valb = true;
+    } else if (strcmp(f, yytext) == 0) {
+        yylval->valb = false;
+    } else {
+        cout << "bool error!" << endl;
+        // Error!
+    }
+    return CONSTBOOL;    
 }
 {number}    {
-    yylval.text = strdup(yytext);
-    return CONSTANT;
+    print_token(NUM, yytext, atoi(yytext));
+    yylval = &dummy;
+    yylval->attr.vali = atoi(yytext);
+    return NUM;
 }
 
 {identity}      {
-    if(properties.find(yytext) == properties.end())
-        properties[yytext] = cnt++;
-    yylval.text = strdup(yytext);
+    int p;
+
+    p = symbtl.lookup(yytext);
+    if (p == -1)
+        p = symbtl.insert(yytext, ID);
+    else
+        dummy.type = symbtl.gettype(p);
+    print_token(symbtl.gettoken(yytext), yytext, p);
+    yylval = &dummy;
+    yylval->attr.symbtl.seq = p;
+
     return ID;
     }
 
