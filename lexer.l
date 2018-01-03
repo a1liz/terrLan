@@ -26,8 +26,6 @@ decDigit    [0-9]
 octDigit    [0-7]
 hexDigit    [0-9a-fA-F]
 charVal     '([^\n\\]|(\\.)|(\\{octDigit}{1,3})|(\\[xX]{hexDigit}{1,2}))'
-stringVal   \"(\\.|[^\\"\n])*\"
-boolVal     ("true"|"false")
 
 identity    {letter}({letter}|{decDigit})*
 decimal     (({decDigit}|[1-9]{decDigit}+)(((\.){decDigit}+)?))|(\.){decDigit}+
@@ -81,6 +79,18 @@ whitespace      {delimitation}+
 "switch"        {print_token(SWITCH, yytext); return SWITCH;}
 "void"	        {print_token(VOID, yytext); return VOID;}
 "while"	        {print_token(WHILE, yytext); return WHILE;}
+"true"          {
+    print_token(TRUE, yytext); 
+    yylval = &dummy;
+    yylval->valb = true;
+    return TRUE;
+}
+"false" {
+    print_token(FALSE, yytext);
+    yylval = &dummy;
+    yylval->valb = false;
+    return FALSE;
+}
 
 ">>="			{print_token(RIGHT_ASSIGN, yytext); return RIGHT_ASSIGN;}
 "<<="			{print_token(LEFT_ASSIGN, yytext); return LEFT_ASSIGN;}
@@ -114,7 +124,6 @@ whitespace      {delimitation}+
 "("			    {print_token(LPAREN, yytext); return LPAREN;}
 ")"			    {print_token(RPAREN, yytext); return RPAREN;}
 "."			    {print_token(DOT, yytext); return DOT;}
-"&"			    {print_token(AND, yytext); return AND;}
 "!"			    {print_token(NOT, yytext); return NOT;}
 "~"			    {print_token(TLIDE, yytext); return TLIDE;}
 "-"			    {print_token(SUB, yytext); return SUB;}
@@ -124,6 +133,7 @@ whitespace      {delimitation}+
 "%"			    {print_token(MOD, yytext); return MOD;}
 "<"			    {print_token(LT, yytext); return LT;}
 ">"			    {print_token(GT, yytext); return GT;}
+"&"			    {print_token(AND, yytext); return AND;}
 "^"			    {print_token(XOR, yytext); return XOR;}
 "|"			    {print_token(OR, yytext); return OR;}
 "?"			    {print_token(QUESTION, yytext); return QUESTION;}
@@ -133,26 +143,6 @@ whitespace      {delimitation}+
     yylval = &dummy;
     yylval->attr.valc = yytext[0];
     return CONSTCHAR;
-}
-{stringVal} {
-    print_token(CONSTSTR,yytext);
-    yylval = &dummy;
-    yylval->attr.vals = strdup(yytext);
-    return CONSTSTR;
-}
-{boolVal}   {
-    print_token(CONSTBOOL,yytext);
-    yylval = &dummy;
-    char* t = "true",f = "false";
-    if (strcmp(t, yytext) == 0) {
-        yylval->valb = true;
-    } else if (strcmp(f, yytext) == 0) {
-        yylval->valb = false;
-    } else {
-        cout << "bool error!" << endl;
-        // Error!
-    }
-    return CONSTBOOL;    
 }
 {number}    {
     print_token(NUM, yytext, atoi(yytext));
