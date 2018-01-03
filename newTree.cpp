@@ -15,7 +15,85 @@ int Tree::temp_var_seq = 0;
 int Tree::label_seq = 0;
 
 void Node::output(void) {
-    
+    cout.setf(ios_base::left);
+	cout.width(2);
+	cout << seq << ": ";
+	switch(nodetype)
+	{
+	case STMT_NODE:
+		{
+			string names[] = { "label", "if", "if-else", "switch", "case", "default", "return" };
+			cout.width(40);
+			cout << names[subtype] + " statement,";
+			break;
+		}
+	case EXPR_NODE:
+		{
+			string names[] = { "TERNARY_EXPR", "BINARY_EXPR", "UNARY_EXPR" };
+			string types[] = { "Notype", "Integer", "Boolean", "Character" };
+            string binary_ops[] = {">>","<<","&&","||","<=",">=","==","!=","+","-","*","/","%","<",">","&","^","|"};
+            string unary_ops[] = {"++","--","!","~"};
+			cout.width(20);
+			cout << names[subtype] + ',';
+			cout.width(10);
+			cout << types[valuetype] + ',';
+			cout.width(10);
+			switch (subtype)
+			{
+                case OP_EXPR: {
+                    char tmp[100];
+                    if (attr.op >= RIGHT_OP && attr.op <= OR)
+                        sprintf(tmp, "op: %s, t%d", binary_ops[attr.op - RIGHT_OP].c_str(), temp_var);
+                    else if (attr.op >= INC_OP && attr.op <= TLIDE)
+                        sprintf(tmp, "op: %s",unary_ops[attr.op - INC_OP]);
+                    else if (attr.op == QUESTION)
+                        sprintf(tmp, "op: ?-:");
+                    cout << tmp;
+                }
+                case CONST_EXPR: {
+                    if (valuetype == Integer)
+                    {
+                        char tmp[100];
+                        sprintf(tmp, "value:%d, ", attr.vali);
+                        cout << tmp;
+                    }
+                    else if (valuetype == Boolean && attr.valb == true)
+                        cout << string("value: 'true'");
+                    else if (valuetype == Boolean && attr.valb == false)
+                        cout << string("value: 'false'");
+                    else
+                        cout << string("value: '") + attr.valc + "',";                
+                    break;
+                }
+			}
+			break;
+		}
+	case DECL_NODE:
+		{
+			string names[] = { "Var Declaration, ", "Array Declaration, " };
+			cout.width(40);
+			cout << names[subtype];
+			break;
+		}
+	}
+
+	cout << "Children: ";
+	for (int i = 0; i < MAX_CHILDREN; i++) {
+		if (NULL == children[i])
+			break;
+		else
+		{
+			cout << children[i]->seq << " ";
+		}
+        if (i)
+        {
+            i--;
+            for (Node *child = (children[i])->sibling; child; child = child->sibling)
+                cout << child->seq << " ";
+        }
+    }
+
+	cout << endl;
 }
 
 Node* Tree::NewRoot(int nodetype, int subtype, int valuetype, NodeAttr attr, Node* child1, Node* child2, Node* child3, Node* child4) {
@@ -35,6 +113,10 @@ Node* Tree::NewRoot(int nodetype, int subtype, int valuetype, NodeAttr attr, Nod
         root = t;
         type_check(t);
         get_temp_var(t);
+        
+        #ifdef PARSE_DEBUG
+		t->output();
+        #endif
     }
     return t;
 }
