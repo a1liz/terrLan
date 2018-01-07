@@ -10,7 +10,7 @@ typedef struct TAG_SYMBOL_ENTRY {
 
 class symbol_table {
 private:
-    symbol_entry table[MAX_ID]
+    symbol_entry table[MAX_ID];
     int size;
 
 public:
@@ -20,6 +20,7 @@ public:
     char* getname(int pos);
     int settype(int pos, int type);
     int gettype(int pos);
+    int getsize();
 };
 
 #endif

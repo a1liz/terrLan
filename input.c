@@ -1,30 +1,16 @@
-
-/*
-这是
-多行
-注释
-*/
-
-// 这是注释
-
-int ff() {
-    return 0;
-}
-
-void main()
+main()
 {
-	(1 - (2 - 3) - 4);
-	for(;a>=0||a<2;a=a+2)
+	int a, b;
+	a = 10;
+	b = 8;
+	for (int i = 0; i<10; i++)
 	{
-        a=1;
-        a=2;
-		a = 1+2*(3+4);
-    }
-    ff();
+		print(i);
+		if(i<3||i>5&&i<7)
+		{
+		print(15);
+		}
+	}
+	int c;
+	input(c);
 }
-
-
-
-
-
-

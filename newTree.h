@@ -14,88 +14,52 @@ enum {
     STMT_NODE = 0,
     EXPR_NODE,
     DECL_NODE,
+    TYPE_DEFINE_NODE,
+    ID_NODE
 };
 
-enum {
-    LABEL_STMT = 0,
-    IF_STMT,
-    IF_ELSE_STMT,
-    SWITCH_STMT,
-    CASE_STMT,
-    DEFAULT_STMT,
-    RETURN_STMT
+enum SUB_TYPE{
+    NO_SUB_TYPE = 0,PROGRAM,ID_EXPR,CONST_EXPR,COMP_EXPR,POST_INC,POST_DEC,PRE_INC,PRE_DEC,POSITIVE,
+    NEGATIVE,BNOT,LNOT,MUL_OP,DIV_OP,MOD_OP,ADD_OP,
+    SUB_OP,LSHIFT,RSHIFT,GREATER,LESS,GREATEREQ,LESSEQ,EQUAL,
+    NEQUAL,BAND,BXOR,BOR,LAND,LOR,ASSIGN_EXPR,COMMA_EXPR,DECLARE,
+    INIT_DECL_LIST,INIT_DECL,VOID_DECL,CHAR_DECL,INT_DECL,BOOL_DECL,
+    COMP_STMT,STMTS,EXPR_STMT,IF_STMT,IF_ELSE_STMT,WHILE_STMT,DO_WHILE_STMT,FOR_STMT,
+    CONTINUE_OP,BREAK_OP,RETURN_OP,INPUT_OP,PRINT_OP
 };
 
-enum {
-    OP_EXPR = 0,
-    CONST_EXPR,
-};
-
-enum {
-    VAR_DECL = 0,
-    ARRAY_DECL
-};
 
 enum {
     Notype = 0,
     Integer,
     Boolean,
-    Character
+    Character,
+    Void
 };
 
-// enum {
-//     RIGHT_OP = 0,
-//     LEFT_OP,
-//     INC_OP,
-//     DEC_OP,
-//     AND_OP,
-//     OR_OP,
-//     LE_OP,
-//     GE_OP,
-//     EQ_OP,
-//     NE_OP,
-//     AND,
-//     XOR,
-//     OR,
-//     ADD,
-//     SUB,
-//     MUL,
-//     DIV,
-//     MOD,
-//     NOT,
-//     TLIDE,
-//     PTR_OP
-// };
-
 union NodeAttr {
-    int op;
     int vali;
     char valc;
     bool valb;
     
-    int symbl_seq;
+    int symbtl_seq;
 
-    NodeAttr(void) {op = 0;}
+    NodeAttr(void) {vali = 0;}
     NodeAttr(int i) {vali = i;}
     NodeAttr(char c) {valc = c;}
     NodeAttr(bool b) {valb = b;}
 };
 
-union Label {
-    struct {
-        char* true_label;
-        char* false_label;
-    };
-    struct {
-        char* begin_label;
-        char* next_label;
-    };
+struct Label {
+    string true_label;
+    string false_label;
+    string begin_label;
+    string next_label;
 };
 
 class Node {
 public:
     vector<Node*> children;
-    vector<Node*> sibling;
     int lineno;
     int nodetype; // 节点种类
     int subtype; // 节点子种类
@@ -106,6 +70,7 @@ public:
     Label label;
 
     void output(void);
+    void setChildValuetype(int v);
 };
 
 class Tree {
@@ -119,20 +84,22 @@ private:
     void type_check(Node *t);
     void get_temp_var(Node *t);
     
-    // char* new_label(void);
-    // void recursive_get_label(Node *t);
-    // void stmt_get_label(Node *t);
-    // void expr_get_label(Node *t);
-    // void gen_header(ostream &out);
-    // void gen_decl(ostream &out, Node *t);
-    // void recursive_gen_code(ostream &out, Node *t);
-    // void stmt_gen_code(ostream &out, Node *t);
-    // void expr_gen_code(ostream &out, Node *t);
+    string new_label(void);
+    void recursive_get_label(Node *t);
+    void stmt_get_label(Node *t);
+    void expr_get_label(Node *t);
+    void gen_header(ostream &out);
+    void gen_data(ostream &out);
+    void recursive_gen_code(ostream &out, Node *t);
+    void stmt_gen_code(ostream &out, Node *t);
+    void expr_gen_code(ostream &out, Node *t);
+    void get_name(ostream &out, Node *t);
 
 public:
-    Node* NewRoot(int nodetype, int type_type, int valuetype, NodeAttr attr, Node* child1 = NULL, Node* child2 = NULL, Node* child3 = NULL, Node* child4 = NULL);
+    Node* NewRoot(int nodetype, int subtype, int valuetype, NodeAttr attr, Node* child1 = NULL, Node* child2 = NULL, Node* child3 = NULL, Node* child4 = NULL);
     void get_label(void);
     void gen_code(ostream &out);
+    void type_check_all(Node* node);
 };
 
 #endif

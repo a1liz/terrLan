@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cstring>
-#include <symbol.h>
-#include <newTree.h>
+#include "symbol.h"
+#include "newTree.h"
 
-symbol_table symtbl;
+symbol_table symbtl;
 
 int symbol_table::lookup(char* name) {
     for (int i = 0; i < size; i ++)
@@ -17,7 +17,7 @@ int symbol_table::insert(char* name, int token) {
         return -1;
     table[size].name = new char[strlen(name) + 1];
     strcpy(table[size].name,name);
-    table[size].toekn = token;
+    table[size].token = token;
     table[size].type = Notype;
     size++;
     return size - 1;
@@ -52,4 +52,8 @@ int symbol_table::gettype(int pos) {
     }
 
     return table[pos].type;
+}
+
+int symbol_table::getsize() {
+    return size;
 }

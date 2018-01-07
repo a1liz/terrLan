@@ -46,14 +46,14 @@ whitespace      {delimitation}+
                 LABEL:
                 do
                 {
-                    c = input();
+                    c = getchar();
                     if( c == '\n')
                     	lineno++;
                 }while(c != '*');
                 
                 do
                 {
-                    c = input();
+                    c = getchar();
                     if(c == '/')
                         break;
                     if( c == '\n')
@@ -69,39 +69,30 @@ whitespace      {delimitation}+
 "continue"	    {print_token(CONTINUE, yytext); return CONTINUE;}
 "default"	    {print_token(DEFAULT, yytext); return DEFAULT;}
 "do"	        {print_token(DO, yytext); return DO;}
-"double"        {print_token(DOUBLE, yytext); return DOUBLE;}
 "else"	        {print_token(ELSE, yytext); return ELSE;}
-"float"	        {print_token(FLOAT, yytext); return FLOAT;}
 "for"	        {print_token(FOR, yytext); return FOR;}
 "if"	        {print_token(IF, yytext); return IF;}
 "int"	        {print_token(INT, yytext); return INT;}
 "return"        {print_token(RETURN, yytext); return RETURN;}
 "switch"        {print_token(SWITCH, yytext); return SWITCH;}
 "void"	        {print_token(VOID, yytext); return VOID;}
+"input"         {print_token(INPUT, yytext); return INPUT;}
+"print"         {print_token(PRINT, yytext); return PRINT;}
 "while"	        {print_token(WHILE, yytext); return WHILE;}
+"main"          {print_token(MAIN, yytext); return MAIN;}
 "true"          {
     print_token(TRUE, yytext); 
     yylval = &dummy;
-    yylval->valb = true;
+    yylval->attr.valb = true;
     return TRUE;
 }
 "false" {
     print_token(FALSE, yytext);
     yylval = &dummy;
-    yylval->valb = false;
+    yylval->attr.valb = false;
     return FALSE;
 }
 
-">>="			{print_token(RIGHT_ASSIGN, yytext); return RIGHT_ASSIGN;}
-"<<="			{print_token(LEFT_ASSIGN, yytext); return LEFT_ASSIGN;}
-"+="			{print_token(ADD_ASSIGN, yytext); return ADD_ASSIGN;}
-"-="			{print_token(SUB_ASSIGN, yytext); return SUB_ASSIGN;}
-"*="			{print_token(MUL_ASSIGN, yytext); return MUL_ASSIGN;}
-"/="			{print_token(DIV_ASSIGN, yytext); return DIV_ASSIGN;}
-"%="			{print_token(MOD_ASSIGN, yytext); return MOD_ASSIGN;}
-"&="			{print_token(AND_ASSIGN, yytext); return AND_ASSIGN;}
-"^="			{print_token(XOR_ASSIGN, yytext); return XOR_ASSIGN;}
-"|="			{print_token(OR_ASSIGN, yytext); return OR_ASSIGN;}
 ">>"			{print_token(RIGHT_OP, yytext); return RIGHT_OP;}
 "<<"			{print_token(LEFT_OP, yytext); return LEFT_OP;}
 "&&"			{print_token(AND_OP, yytext); return AND_OP;}
@@ -151,15 +142,15 @@ whitespace      {delimitation}+
 
 {identity}      {
     int p;
-
     p = symbtl.lookup(yytext);
     if (p == -1)
         p = symbtl.insert(yytext, ID);
     else
-        dummy.type = symbtl.gettype(p);
+        dummy.valuetype = symbtl.gettype(p);
+    // cout <<  "p = " << p << ", valuetype = " << dummy.valuetype << "aaaaaaaaa" << endl;
     print_token(symbtl.gettoken(yytext), yytext, p);
     yylval = &dummy;
-    yylval->attr.symbtl.seq = p;
+    yylval->attr.symbtl_seq = p;
 
     return ID;
     }
@@ -175,12 +166,12 @@ return 1;
 }
 
 static void print_token(int token, char *lexeme, int attr) {
-#ifdef LEX_DEBUG
+
     cout << "token: " << token << ",\tlexeme: " << lexeme;
     if (token == ID)
         cout << ",\tsymbol table pos: " << attr;
     else if (token == NUM)
         cout << ",\tvalue: " << attr;
     cout << endl;
-#endif
+
 }
